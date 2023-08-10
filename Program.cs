@@ -52,4 +52,17 @@ app.UseAuthentication();// you should add it here
 
 app.MapControllers();
 //app.UseMiddleware<ExceptionMiddleware>();
+using var scope = app.Services.CreateScope();//this code is for seed in database
+var services = scope.ServiceProvider;
+try
+{
+    var context = services.GetRequiredService<DataContext>();
+    await context.Database.MigrateAsync();
+    await Seed.SeedUsers(context);
+}
+catch(Exception ex)
+{
+    var logger = services.GetService<Logger<Program>>();
+    //logger.LogError(ex, "An error occured during Migration");
+}
 app.Run();

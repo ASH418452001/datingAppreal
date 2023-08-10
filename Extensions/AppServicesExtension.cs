@@ -16,6 +16,8 @@ namespace datingAppreal.Extensions
             });
             //add bulider for token 
             services.AddScoped<ITokenServices, TokenServices>();
+            services.AddScoped<IUserRepostory , UserRepository>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             return services;
         }
     }

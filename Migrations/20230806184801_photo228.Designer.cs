@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using datingAppreal.Data;
 
@@ -11,9 +12,11 @@ using datingAppreal.Data;
 namespace datingAppreal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230806184801_photo228")]
+    partial class photo228
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,13 +36,16 @@ namespace datingAppreal.Migrations
                     b.Property<bool>("IsMain")
                         .HasColumnType("bit");
 
+                    b.Property<int>("MyProperty")
+                        .HasColumnType("int");
+
                     b.Property<string>("PublicId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -66,19 +72,16 @@ namespace datingAppreal.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Interests")
+                    b.Property<string>("Interesets")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Introduction")
+                    b.Property<string>("Intrudction")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KnownAs")
+                    b.Property<string>("KnowAs")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastActive")
@@ -103,13 +106,9 @@ namespace datingAppreal.Migrations
 
             modelBuilder.Entity("datingAppreal.Entities.Photo", b =>
                 {
-                    b.HasOne("datingAppreal.Entities.User", "User")
+                    b.HasOne("datingAppreal.Entities.User", null)
                         .WithMany("Photos")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("datingAppreal.Entities.User", b =>

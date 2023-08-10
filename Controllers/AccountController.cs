@@ -1,4 +1,5 @@
-﻿using datingAppreal.Data;
+﻿using AutoMapper;
+using datingAppreal.Data;
 using datingAppreal.DTOs;
 using datingAppreal.Entities;
 using datingAppreal.InterFace;
@@ -17,18 +18,20 @@ namespace datingAppreal.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenServices _tokenServices;
+        private readonly IMapper _mapper;
 
-        public AccountController(DataContext context , ITokenServices tokenServices)
+        public AccountController(DataContext context , ITokenServices tokenServices, IMapper mapper)
         {
             _context = context;
             _tokenServices = tokenServices;
+            _mapper = mapper;
         }
 
 
 
         // POST api/<AccountController>
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> register(RegisterDtO registerDtO)
+        public async Task<ActionResult<UserDto>> register([FromQuery] RegisterDtO registerDtO)
         {
             if (await UserExist(registerDtO.Username)) return BadRequest("this username been taken");
             using var hmac = new HMACSHA512();
@@ -60,7 +63,7 @@ namespace datingAppreal.Controllers
 
 
         [HttpPost("Login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDtO loginDtO)
+        public async Task<ActionResult<UserDto>> Login([FromQuery] LoginDtO loginDtO)
         {
             var user = await _context.User.SingleOrDefaultAsync(x=>x.UserName==loginDtO.Username);
             if (user == null) return Unauthorized("invalid username");

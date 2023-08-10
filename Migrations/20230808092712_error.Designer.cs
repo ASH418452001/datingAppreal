@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using datingAppreal.Data;
 
@@ -11,9 +12,11 @@ using datingAppreal.Data;
 namespace datingAppreal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230808092712_error")]
+    partial class error
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,7 +81,7 @@ namespace datingAppreal.Migrations
                     b.Property<string>("Introduction")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KnownAs")
+                    b.Property<string>("KnowAs")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastActive")

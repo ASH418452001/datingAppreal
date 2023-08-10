@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using datingAppreal.Data;
 
@@ -11,9 +12,11 @@ using datingAppreal.Data;
 namespace datingAppreal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230807155915_Mapper")]
+    partial class Mapper
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,6 +35,9 @@ namespace datingAppreal.Migrations
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("bit");
+
+                    b.Property<int>("MyProperty")
+                        .HasColumnType("int");
 
                     b.Property<string>("PublicId")
                         .HasColumnType("nvarchar(max)");
@@ -72,13 +78,13 @@ namespace datingAppreal.Migrations
                     b.Property<string>("Gender")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Interests")
+                    b.Property<string>("Interesets")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Introduction")
+                    b.Property<string>("Intrudction")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("KnownAs")
+                    b.Property<string>("KnowAs")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastActive")
