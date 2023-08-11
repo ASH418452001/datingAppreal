@@ -1,4 +1,5 @@
 ﻿using datingAppreal.Data;
+using datingAppreal.Helpers;
 using datingAppreal.InterFace;
 using datingAppreal.Services;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace datingAppreal.Extensions
             services.AddScoped<ITokenServices, TokenServices>();
             services.AddScoped<IUserRepostory , UserRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddScoped<LogUserAcivity>();
             return services;
         }
     }

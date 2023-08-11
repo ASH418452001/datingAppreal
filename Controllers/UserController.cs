@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using datingAppreal.Data;
 using datingAppreal.DTOs;
+using datingAppreal.Entities;
+using datingAppreal.Extensions;
+using datingAppreal.Helpers;
 using datingAppreal.InterFace;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +14,8 @@ using System.Security.Claims;
 
 namespace datingAppreal.Controllers
 {
+    [ServiceFilter(typeof(LogUserAcivity))]
+
     [Route("api/[controller]")]
     [ApiController]
     /*[Authorize]*/ // just authred member could use these endpoints
@@ -28,10 +33,19 @@ namespace datingAppreal.Controllers
        
         /*[AllowAnonymous] */ // to allow anyone to get in this endpoint
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MemberDtO>>> Get()
+        public async Task<ActionResult<PagedList<MemberDtO>>> Get([FromQuery] UserParams userParams)
         {
+            var currentUser = await _userRepostory.GetUserByNameAsync(User.GetUsername());
+            //userParams.CurrentUsername = currentUser.UserName;
 
-           var user =  await _userRepostory.GetMembersAsync();
+
+            if (string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = currentUser.Gender =="male"?"female" :"male";
+            }
+
+           var user =  await _userRepostory.GetMembersAsync(userParams);
+            Response.AddPaginationHeader(new PaginationHeader(user.CurrentPage,user.PageSize,user.TotalPages,user.TotalCount)); 
           
             return Ok(user);
 

@@ -2,6 +2,7 @@
 using datingAppreal.Data;
 using datingAppreal.DTOs;
 using datingAppreal.Entities;
+using datingAppreal.Helpers;
 using datingAppreal.InterFace;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using System.Text;
 
 namespace datingAppreal.Controllers
 {
+    [ServiceFilter(typeof(LogUserAcivity))]
     [Route("api/[controller]")]
     [ApiController]
     public class AccountController : ControllerBase
@@ -34,21 +36,25 @@ namespace datingAppreal.Controllers
         public async Task<ActionResult<UserDto>> register([FromQuery] RegisterDtO registerDtO)
         {
             if (await UserExist(registerDtO.Username)) return BadRequest("this username been taken");
+
+            var user = _mapper.Map<User>(registerDtO); 
+
             using var hmac = new HMACSHA512();
 
-            var user = new User
-            {
-                UserName = registerDtO.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDtO.Password)),
-                PasswordSalt = hmac.Key
 
-            };
+            user.UserName = registerDtO.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDtO.Password));
+            user.PasswordSalt = hmac.Key;
+
+           
             _context.User.Add(user);
             await _context.SaveChangesAsync();
             return new UserDto
             {
                 Username = user.UserName,
-                Token = _tokenServices.CreateToken(user)
+                Token = _tokenServices.CreateToken(user),
+                KnownAs = user.KnownAs,  
+                Gender = user.Gender
             };
 
         }
@@ -76,7 +82,9 @@ namespace datingAppreal.Controllers
             return new UserDto
                 {
                 Username = user.UserName,
-                Token = _tokenServices.CreateToken(user)
+                Token = _tokenServices.CreateToken(user),
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             };
         }
 
