@@ -36,7 +36,7 @@ namespace datingAppreal.Controllers
         public async Task<ActionResult<PagedList<MemberDtO>>> Get([FromQuery] UserParams userParams)
         {
             var currentUser = await _userRepostory.GetUserByNameAsync(User.GetUsername());
-            //userParams.CurrentUsername = currentUser.UserName;
+            userParams.CurrentUsername = currentUser.UserName;
 
 
             if (string.IsNullOrEmpty(userParams.Gender))

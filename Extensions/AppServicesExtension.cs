@@ -20,6 +20,9 @@ namespace datingAppreal.Extensions
             services.AddScoped<IUserRepostory , UserRepository>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<LogUserAcivity>();
+            services.AddScoped<ILikesRepository,LikesRepository>();
+            services.AddScoped<IMessagesRepository, MessagesRepository>();
+
             return services;
         }
     }

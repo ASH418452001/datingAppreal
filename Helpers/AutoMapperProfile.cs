@@ -17,6 +17,11 @@ namespace datingAppreal.Helpers
             CreateMap<Photo, PhotoDto>();
             CreateMap<MemberUpdateDtO, User>();
             CreateMap<RegisterDtO, User>(); 
+            CreateMap<Message,MessagesDtO>()
+                .ForMember(d => d.SenderPhotoUrl , o => o.MapFrom(s => s.Sender.Photos
+                .FirstOrDefault(x => x.IsMain).Url) )
+                .ForMember(d => d.RecipientPhotoUrl , o => o.MapFrom(s => s.Recipient.Photos
+                .FirstOrDefault(x => x.IsMain).Url)); 
 
         }
 

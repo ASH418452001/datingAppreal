@@ -27,7 +27,7 @@ namespace datingAppreal.Data
         public async Task<PagedList<MemberDtO>> GetMembersAsync(UserParams userParams)
         {
             var query = _context.User.AsQueryable();
-            //query = query.Where(u => u.UserName != userParams.CurrentUsername);
+            query = query.Where(u => u.UserName != userParams.CurrentUsername);
             query = query.Where(u => u.Gender == userParams.Gender);
             var MinDob = DateTime.Today.AddYears(-userParams.MaxAge-1);
             var MaxDob = DateTime.Today.AddYears(-userParams.MinAge);

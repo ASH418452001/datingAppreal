@@ -33,7 +33,7 @@ namespace datingAppreal.Controllers
 
         // POST api/<AccountController>
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> register([FromQuery] RegisterDtO registerDtO)
+        public async Task<ActionResult<UserDto>> register( RegisterDtO registerDtO)
         {
             if (await UserExist(registerDtO.Username)) return BadRequest("this username been taken");
 
