@@ -11,6 +11,12 @@ namespace datingAppreal.InterFace
         Task<Message> GetMessage(int id);
         Task<PagedList<MessagesDtO>> GetMessageForUser(MessageParams messageParams); 
         Task<IEnumerable<MessagesDtO>> GetMessageThread(string currentUserName, string recipientUserName); 
-        Task<bool> SaveAllAsync();
+    
+        void AddGroup(Group group);
+        void RemoveConnection(Connection connection);   
+        Task <Connection> GetConnection(string connectionId);
+        Task<Group> GetMessageGroup(string groupName);
+        Task<Group> GetGroupForConnection(string connectionId);
+
     }
 }

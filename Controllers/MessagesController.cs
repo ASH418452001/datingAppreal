@@ -14,14 +14,12 @@ namespace datingAppreal.Controllers
     [ApiController]
     public class MessagesController : ControllerBase
     {
-        private readonly IUserRepostory _userRepository;
-        private readonly IMessagesRepository _messagesRepository;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public MessagesController(IUserRepostory userRepository, IMessagesRepository messagesRepository, IMapper mapper)
+        public MessagesController(IUnitOfWork uow, IMapper mapper)
         {
-            _userRepository = userRepository;
-            _messagesRepository = messagesRepository;
+            _uow = uow;
             _mapper = mapper;
         }
 
@@ -33,9 +31,9 @@ namespace datingAppreal.Controllers
 
             if (username == createmessageDto.RecipientUsername.ToLower())
                 return BadRequest("you can not send message to yourself");
-            var sender = await _userRepository.GetUserByNameAsync(username);
+            var sender = await _uow.UserRepostory.GetUserByNameAsync(username);
 
-            var recipient = await _userRepository.GetUserByNameAsync(createmessageDto.RecipientUsername);
+            var recipient = await _uow.UserRepostory.GetUserByNameAsync(createmessageDto.RecipientUsername);
 
             if (recipient == null) return NotFound();
 
@@ -47,9 +45,9 @@ namespace datingAppreal.Controllers
                 RecipientUsername = recipient.UserName,
                 Content = createmessageDto.Content
             };
-            _messagesRepository.AddMessage(message);
+            _uow.MessagesRepository.AddMessage(message);
 
-            if (await _messagesRepository.SaveAllAsync()) return Ok(_mapper.Map<MessagesDtO>(message));
+            if (await _uow.Complete()) return Ok(_mapper.Map<MessagesDtO>(message));
             return BadRequest("Failed to send the message");
         }
 
@@ -58,25 +56,19 @@ namespace datingAppreal.Controllers
         public async Task<ActionResult<PagedList<MessagesDtO>>> GetMessagesForUser([FromQuery] MessageParams messageParams)
         {
             messageParams.Username = User.GetUsername();
-            var messages = await _messagesRepository.GetMessageForUser(messageParams);
+            var messages = await _uow.MessagesRepository.GetMessageForUser(messageParams);
 
             Response.AddPaginationHeader(new PaginationHeader(messages.CurrentPage, messages.PageSize, messages.TotalPages, messages.TotalCount));
             return messages;
         }
 
-        [HttpGet("thread/{username}")]
-        public async Task<ActionResult<IEnumerable<MessagesDtO>>> GetMessageThread(string username)
-        {
-            var currentUsername = User.GetUsername();
-
-            return Ok(await _messagesRepository.GetMessageThread(currentUsername, username));
-        }
+     
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteMessage(int id)
         {
             var username = User.GetUsername();
             
-            var message = await _messagesRepository.GetMessage(id);
+            var message = await _uow.MessagesRepository.GetMessage(id);
             
             if (message.SenderUsername != username && message.RecipientUsername != username)
                 return Unauthorized();
@@ -87,10 +79,10 @@ namespace datingAppreal.Controllers
 
             if (message.SenderDeleted & message.RecipientDeleted)
             {
-                _messagesRepository.DeleteMessage(message);
+                _uow.MessagesRepository.DeleteMessage(message);
             }
 
-            if (await _messagesRepository.SaveAllAsync()) return Ok();
+            if (await _uow.Complete()) return Ok();
             return BadRequest("problem to saving the message"); ;
         }
     }

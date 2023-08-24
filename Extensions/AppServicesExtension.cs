@@ -2,6 +2,7 @@
 using datingAppreal.Helpers;
 using datingAppreal.InterFace;
 using datingAppreal.Services;
+using datingAppreal.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace datingAppreal.Extensions
@@ -17,12 +18,14 @@ namespace datingAppreal.Extensions
             });
             //add bulider for token 
             services.AddScoped<ITokenServices, TokenServices>();
-            services.AddScoped<IUserRepostory , UserRepository>();
+            
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddScoped<LogUserAcivity>();
-            services.AddScoped<ILikesRepository,LikesRepository>();
-            services.AddScoped<IMessagesRepository, MessagesRepository>();
-
+           
+            
+            services.AddSignalR();
+            services.AddSingleton<PresenceTracker>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             return services;
         }
     }

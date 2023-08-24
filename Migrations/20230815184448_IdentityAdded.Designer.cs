@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using datingAppreal.Data;
 
@@ -11,9 +12,11 @@ using datingAppreal.Data;
 namespace datingAppreal.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20230815184448_IdentityAdded")]
+    partial class IdentityAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -138,34 +141,6 @@ namespace datingAppreal.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-                });
-
-            modelBuilder.Entity("datingAppreal.Entities.Connection", b =>
-                {
-                    b.Property<string>("ConnectionId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("GroupName")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ConnectionId");
-
-                    b.HasIndex("GroupName");
-
-                    b.ToTable("Connections");
-                });
-
-            modelBuilder.Entity("datingAppreal.Entities.Group", b =>
-                {
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Name");
-
-                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("datingAppreal.Entities.Message", b =>
@@ -403,13 +378,6 @@ namespace datingAppreal.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("datingAppreal.Entities.Connection", b =>
-                {
-                    b.HasOne("datingAppreal.Entities.Group", null)
-                        .WithMany("Connections")
-                        .HasForeignKey("GroupName");
-                });
-
             modelBuilder.Entity("datingAppreal.Entities.Message", b =>
                 {
                     b.HasOne("datingAppreal.Entities.User", "Recipient")
@@ -481,11 +449,6 @@ namespace datingAppreal.Migrations
             modelBuilder.Entity("datingAppreal.Entities.AppRole", b =>
                 {
                     b.Navigation("UserRoles");
-                });
-
-            modelBuilder.Entity("datingAppreal.Entities.Group", b =>
-                {
-                    b.Navigation("Connections");
                 });
 
             modelBuilder.Entity("datingAppreal.Entities.User", b =>

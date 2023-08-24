@@ -16,15 +16,11 @@ namespace datingAppreal.Controllers
     [ApiController]
     public class LikesController : ControllerBase
     {
-       
-        private readonly ILikesRepository _likesRepository;
-        private readonly IUserRepostory _userRepostory;
+        private readonly IUnitOfWork _uow;
 
-        public LikesController( ILikesRepository likesRepository, IUserRepostory userRepostory)
+        public LikesController(IUnitOfWork uow )
         {
-            
-            _likesRepository = likesRepository;
-            _userRepostory = userRepostory;
+            _uow = uow;
         }
 
 
@@ -36,15 +32,15 @@ namespace datingAppreal.Controllers
         {
             var sourceUserId = User.GetUserId();
             
-            var likedUser = await _userRepostory.GetUserByNameAsync(username);
+            var likedUser = await _uow.UserRepostory.GetUserByNameAsync(username);
             
-            var sourceUser = await _likesRepository.GetUserWithLikes(sourceUserId);
+            var sourceUser = await _uow.LikesRepository.GetUserWithLikes(sourceUserId);
 
             if (likedUser == null) return NotFound();
             
             if (sourceUser.UserName == username) return BadRequest("You can not like yourself");
             
-            var userLike = await _likesRepository.GetUserLike(sourceUserId, likedUser.Id);
+            var userLike = await _uow.LikesRepository.GetUserLike(sourceUserId, likedUser.Id);
             
             if (userLike != null) return BadRequest("you  already likke this user");
 
@@ -56,7 +52,7 @@ namespace datingAppreal.Controllers
             
             sourceUser.LikedUsers.Add(userLike);
 
-            if (await _userRepostory.SaveAllAsync()) return Ok();
+            if (await _uow.Complete()) return Ok();
             return BadRequest("Failed to like User");
         }
 
@@ -66,7 +62,7 @@ namespace datingAppreal.Controllers
         {
             likesParams.UserId = User.GetUserId();
            
-            var users = await _likesRepository.GetUserLikes(likesParams);
+            var users = await _uow.LikesRepository.GetUserLikes(likesParams);
 
             Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage
                 , users.PageSize, users.TotalCount, users.TotalPages));
@@ -74,10 +70,6 @@ namespace datingAppreal.Controllers
             return Ok(users);
         }
 
-        // DELETE api/<LikesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+       
     }
 }

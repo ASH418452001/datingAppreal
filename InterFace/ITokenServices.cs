@@ -6,7 +6,7 @@ namespace datingAppreal.InterFace
     public interface ITokenServices
     {
 
-       string CreateToken(User user);
+       Task<string> CreateToken(User user);
        
     }
 }

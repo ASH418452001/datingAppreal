@@ -21,30 +21,32 @@ namespace datingAppreal.Controllers
     /*[Authorize]*/ // just authred member could use these endpoints
     public class UserController : ControllerBase
     {
-        private readonly IUserRepostory _userRepostory;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public UserController(IUserRepostory userRepostory ,IMapper mapper )
+        public UserController(IUnitOfWork uow ,IMapper mapper )
         {
-            _userRepostory = userRepostory;
+            _uow = uow;
             _mapper = mapper;
         }
-        // GET: api/<UserController>
-       
+        
+
         /*[AllowAnonymous] */ // to allow anyone to get in this endpoint
+
+        
         [HttpGet]
         public async Task<ActionResult<PagedList<MemberDtO>>> Get([FromQuery] UserParams userParams)
         {
-            var currentUser = await _userRepostory.GetUserByNameAsync(User.GetUsername());
-            userParams.CurrentUsername = currentUser.UserName;
+            var gender = await _uow.UserRepostory.GetUserGender(User.GetUsername());
+            userParams.CurrentUsername = User.GetUsername();
 
 
             if (string.IsNullOrEmpty(userParams.Gender))
             {
-                userParams.Gender = currentUser.Gender =="male"?"female" :"male";
+                userParams.Gender = gender =="male"?"female" :"male";
             }
 
-           var user =  await _userRepostory.GetMembersAsync(userParams);
+           var user =  await _uow.UserRepostory.GetMembersAsync(userParams);
             Response.AddPaginationHeader(new PaginationHeader(user.CurrentPage,user.PageSize,user.TotalPages,user.TotalCount)); 
           
             return Ok(user);
@@ -53,37 +55,26 @@ namespace datingAppreal.Controllers
         }
 
 
-        // GET api/<UserController>/5
+       
         [HttpGet("{username}")]
         public async Task<ActionResult<MemberDtO>> Get(string username)
         {
-            return await _userRepostory.GetMemberAsync(username) ; //How to  make return just to what i need , like username ?
-            
+            return await _uow.UserRepostory.GetMemberAsync(username) ; 
         }
 
-        // POST api/<UserController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
 
-        // PUT api/<UserController>/5
+      
         [HttpPut]
         public async Task<ActionResult> UpdateUser([FromQuery] MemberUpdateDtO memberUpdateDtO)
         {
             var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = await _userRepostory.GetUserByNameAsync(username);
+            var user = await _uow.UserRepostory.GetUserByNameAsync(username);
             if (user == null) return NotFound();
             _mapper.Map(memberUpdateDtO, user);
-            if (await _userRepostory.SaveAllAsync()) return NoContent();
+            if (await _uow.Complete()) return NoContent();
             return BadRequest("Failed to update user");
         }
 
 
-        // DELETE api/<UserController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

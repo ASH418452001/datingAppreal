@@ -4,10 +4,10 @@ using datingAppreal.DTOs;
 using datingAppreal.Entities;
 using datingAppreal.Helpers;
 using datingAppreal.InterFace;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
+
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,13 +18,13 @@ namespace datingAppreal.Controllers
     [ApiController]
     public class AccountController : ControllerBase
     {
-        private readonly DataContext _context;
+        private readonly UserManager<User> _userManager;
         private readonly ITokenServices _tokenServices;
         private readonly IMapper _mapper;
 
-        public AccountController(DataContext context , ITokenServices tokenServices, IMapper mapper)
+        public AccountController(UserManager<User> userManager , ITokenServices tokenServices, IMapper mapper)
         {
-            _context = context;
+            _userManager = userManager;
             _tokenServices = tokenServices;
             _mapper = mapper;
         }
@@ -33,26 +33,28 @@ namespace datingAppreal.Controllers
 
         // POST api/<AccountController>
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>> register( RegisterDtO registerDtO)
+        public async Task<ActionResult<UserDto>> register([FromQuery] RegisterDtO registerDtO)
         {
             if (await UserExist(registerDtO.Username)) return BadRequest("this username been taken");
 
             var user = _mapper.Map<User>(registerDtO); 
 
-            using var hmac = new HMACSHA512();
+      
 
 
             user.UserName = registerDtO.Username.ToLower();
-            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDtO.Password));
-            user.PasswordSalt = hmac.Key;
 
+
+            var result = await _userManager.CreateAsync(user, registerDtO.Password); ;
+            if (!result.Succeeded) return BadRequest(result.Errors);
+
+            var roleResult = await _userManager.AddToRoleAsync(user, "Member");
+            if (!roleResult.Succeeded) return BadRequest(result.Errors);
            
-            _context.User.Add(user);
-            await _context.SaveChangesAsync();
             return new UserDto
             {
                 Username = user.UserName,
-                Token = _tokenServices.CreateToken(user),
+                Token = await _tokenServices.CreateToken(user),
                 KnownAs = user.KnownAs,  
                 Gender = user.Gender
             };
@@ -62,7 +64,7 @@ namespace datingAppreal.Controllers
 
        private async Task<bool> UserExist(string username)
         {
-            return await _context.User.AnyAsync(x => x.UserName==username.ToLower());
+            return await _userManager.Users.AnyAsync(x => x.UserName==username.ToLower());
         }
 
 
@@ -71,33 +73,23 @@ namespace datingAppreal.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<UserDto>> Login([FromQuery] LoginDtO loginDtO)
         {
-            var user = await _context.User.SingleOrDefaultAsync(x=>x.UserName==loginDtO.Username);
+            var user = await _userManager.Users.SingleOrDefaultAsync(x=>x.UserName==loginDtO.Username);
+            
             if (user == null) return Unauthorized("invalid username");
-            using var hmac = new HMACSHA512(user.PasswordSalt);
-            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDtO.Password));
-            for (int i =0; i < computedHash.Length; i++)
-            {
-                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("invalid password");
-            }
+
+            var result = await _userManager.CheckPasswordAsync(user, loginDtO.Password);
+
+            if (!result) return Unauthorized("invalid Password");
+
             return new UserDto
                 {
                 Username = user.UserName,
-                Token = _tokenServices.CreateToken(user),
+                Token = await _tokenServices.CreateToken(user),
                 KnownAs = user.KnownAs,
                 Gender = user.Gender
             };
         }
 
-        // PUT api/<AccountController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<AccountController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+       
     }
 }
